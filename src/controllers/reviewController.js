@@ -28,17 +28,16 @@ const reviewData = async function (req, res) {
             res.status(400).send({ status: false, message: 'You Are Providing Invalid bookId' });
             return;
         }
-        const bookId = review.bookId
+        const {bookId, reviewedBy, rating } = review;
+        if (!isValid(bookId)) {
+            res.status(400).send({ status: false, message: 'bookId  is required' });
+            return;
+        }
         if (params == bookId) {
             let book = await bookModel.findOne({ _id: bookId })
 
             if (!book) {
                 return res.status(404).send({ status: false, message: 'book does not exist' });
-            }
-            const { reviewedBy, rating } = review;
-            if (!isValid(bookId)) {
-                res.status(400).send({ status: false, message: 'bookId  is required' });
-                return;
             }
             if (reviewedBy) {
                 if (!isValid(reviewedBy)) {
@@ -175,7 +174,7 @@ const reviewDelete = async function (req, res) {
         if (findbook && findreview) {
             let ID = findreview.bookId
             if (ID == bookID) {
-                const deleteReview = await reviewModel.findOneAndUpdate({ _id: bookID, isDeleted: false }, { isDeleted: true }, { new: true })
+                const deleteReview = await reviewModel.findOneAndUpdate({ _id: reviewId, isDeleted: false }, { isDeleted: true }, { new: true })
                 let checker1 = await reviewModel.find({ bookId: bookID, isDeleted: false });
                 let number1 = checker1.length
                 await bookModel.findOneAndUpdate({ _id: bookID, isDeleted: false }, { reviews: number1 })

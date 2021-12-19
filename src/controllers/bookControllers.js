@@ -34,14 +34,6 @@ const createBook = async function (req, res) {
         if (isBookAlreadyExist) {
             return res.status(403).send({ status: false, message: 'Book  already  exist' });
         }
-        const sameTitle = await bookModel.findOne({ title: title.trim() });
-        if (sameTitle) {
-            return res.status(403).send({ status: false, message: `${title} is already in used` });
-        }
-        const sameISBN = await bookModel.findOne({ ISBN: ISBN.split(" ").join("") });
-        if (sameISBN) {
-            return res.status(403).send({ status: false, message: `${ISBN} is already in used` });
-        }
         if (!isValid(title)) {
             res.status(400).send({ status: false, message: 'Title  is required' });
             return;
@@ -71,11 +63,19 @@ const createBook = async function (req, res) {
             res.status(400).send({ status: false, message: `subCategory is required` });
             return;
         }
+        const sameTitle = await bookModel.findOne({ title: title.trim() });
+        if (sameTitle) {
+            return res.status(403).send({ status: false, message: `${title} is already in used` });
+        }
+        const sameISBN = await bookModel.findOne({ ISBN: ISBN.split(" ").join("") });
+        if (sameISBN) {
+            return res.status(403).send({ status: false, message: `${ISBN.split(" ").join("")} is already in used` });
+        }
         if (req.user.userId == userId) {
             let findid = await writerModel.findOne({ userId })
             if (findid) {
                 book["releasedAt"] = moment().format("MMM Do YY");
-                book["ISBN"] =ISBN.split(" ").join("");
+                book["ISBN"] = ISBN.split(" ").join("");
                 let savedBook = await bookModel.create(book);
                 return res.status(201).send({ status: true, message: 'Success', data: savedBook });
             } else {
@@ -98,6 +98,10 @@ const getBook = async function (req, res) {
         let updatedfilter = { isDeleted: false }
         if (req.query.userId) {
             updatedfilter["userId"] = req.query.userId
+            if (!isValidObjectId(req.query.userId)) {
+                res.status(400).send({ status: false, message: `Userid is Invalid` });
+                return;
+            }
         }
         if (req.query.category) {
             updatedfilter["category"] = req.query.category
@@ -132,11 +136,11 @@ const findBook = async function (req, res) {
             if (findbook) {
                 let { title, excerpt, userId, category, subcategory, isDeleted, reviews, deletedAt, releasedAt, createdAt, updatedAt } = findbook
 
-                let reviewsData = await reviewModel.find({ bookId: bookId ,isDeleted:false}).select({ createdAt: 0, updatedAt: 0, __v: 0 });
+                let reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false }).select({ createdAt: 0, updatedAt: 0, __v: 0 });
 
                 const data = { title, excerpt, userId, category, subcategory, isDeleted, reviews, deletedAt, releasedAt, createdAt, updatedAt, reviewsData }
 
-                data["reviews"]=data["reviewsData"].length
+                data["reviews"] = data["reviewsData"].length
                 return res.status(200).send({ status: true, messege: "Book List", Data: data })
 
             } else {
@@ -162,6 +166,10 @@ const updateBook = async function (req, res) {
         if (!isValid(bookId)) {
             return res.status(400).send({ messege: "Please Provide The Book Id" })
         }
+        if (!isValidObjectId(bookId)) {
+            res.status(400).send({ status: false, message: `bookid is Invalid` });
+            return;
+        }
         if (!isValidRequestBody(req.body)) {
             return res.status(400).send({ messege: "Please Provide The Required Field" })
         }
@@ -172,8 +180,9 @@ const updateBook = async function (req, res) {
             }
             const sametitle = await bookModel.findOne({ title: title.trim() });
             if (sametitle) {
-                return res.status(403).send({ status: false, message: `${title} is already in used` });
+                return res.status(403).send({ status: false, message: `${title.trim()} is already in used` });
             }
+            title = title.trim();
         }
         if (excerpt) {
             if (!isValid(excerpt)) {
@@ -181,13 +190,16 @@ const updateBook = async function (req, res) {
             }
         }
         if (ISBN) {
+
             if (!isValid(ISBN)) {
                 return res.status(400).send({ messege: "Please Provide The Valid ISBN" })
             }
             const SameISBN = await bookModel.findOne({ ISBN: ISBN.split(" ").join("") });
             if (SameISBN) {
-                return res.status(403).send({ status: false, message: `${ISBN} is already in used` });
+                return res.status(403).send({ status: false, message: `${ISBN.split(" ").join("")} is already in used` });
             }
+            ISBN = ISBN.split(" ").join("");
+
         }
         if (releasedate) {
             if (!isValid(releasedate)) {

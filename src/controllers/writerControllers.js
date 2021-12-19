@@ -61,11 +61,11 @@ const createWriter = async function (req, res) {
       return;
     }
     if (!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))) {
-      res.status(404).send({ status: false, message: `Email should be a valid email address` })
+      res.status(404).send({ status: false, message: `${email} should be a valid email address` })
       return
     }
     if (!(/^(\+91[\-\s]?)?[0]?(91)?[789]\d{9}$/.test(phone))) {
-      res.status(404).send({ status: false, message: 'Mobile number should be a valide number' })
+      res.status(404).send({ status: false, message: `${phone} is not a valid number` })
       return
     }
 
