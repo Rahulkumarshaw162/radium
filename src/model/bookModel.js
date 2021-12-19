@@ -6,7 +6,7 @@ const bookSchema = new mongoose.Schema({
 
     excerpt:{ type:String, require:true,},
 
-    userId:{type: mongoose.Schema.Types.ObjectId, ref: 'writerDB'},
+    userId:{type: mongoose.Schema.Types.ObjectId, ref: 'writerDB',required:true},
 
     ISBN:{ type:String, required:true,unique:true},
 
@@ -20,7 +20,7 @@ const bookSchema = new mongoose.Schema({
 
     isDeleted:{ type:Boolean, default:false},
 
-    releasedAt:{ type:Date, default:null},
+    releasedAt:{ type:String, default:null},
 
 }, { timestamps: true })
 
