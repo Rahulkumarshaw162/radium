@@ -58,6 +58,9 @@ const reviewData = async function (req, res) {
             reviewData = await reviewModel.create(reviewData)
 
             let checker = await reviewModel.find({ bookId: bookId, isDeleted: false });
+            if(!checker){
+                return res.status(400).send({ status: false, messege: "No Reviews Found" })
+            }
             let number = checker.length
 
             await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { reviews: number })
