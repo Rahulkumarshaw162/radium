@@ -5,13 +5,13 @@ const writerSchema = new mongoose.Schema({
      title: {type:String,required:true, enum:['Mr', 'Mrs','Miss']},
      name: {type:String,required:true,trim:true},
      phone: {
-          type:Number,
+             type:String,
              unique:true,
              required:true,
              trim:true
      },
      email: {
-          type: String,
+        type: String,
         trim: true,
         lowercase: true,
         unique: true,
@@ -19,7 +19,7 @@ const writerSchema = new mongoose.Schema({
      }, 
      password: { type: String,
           trim: true,
-          unique: true,},
+          },
      address: {
        street: {type:String},
        city: {type:String},

@@ -99,11 +99,13 @@ const updateReview = async function (req, res) {
                 return res.status(404).send({ messege: "Please provide The Name" })
             }
         }
+        if(reviewedBy === ""){return res.status(404).send({ messege: "Please provide The Name" })}
         if (review) {
             if (!isValid(review)) {
                 return res.status(404).send({ messege: "Please Provide Your Review" })
             }
         }
+        if(review === ""){return res.status(404).send({ messege: "Please provide The Review" })}
         if (rating) {
             if (!isValid(rating)) {
                 return res.status(404).send({ messege: "Please Provide Your Rating" })

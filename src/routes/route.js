@@ -12,12 +12,12 @@ router.post("/login", writerController.login)
 
 //BOOK
 router.post("/books", middileware.Auth, bookController.createBook)
-router.get("/books", bookController.getBook)
-router.get("/books/:bookId",bookController.findBook)
+router.get("/books", middileware.Auth, bookController.getBook)
+router.get("/books/:bookId", middileware.Auth,bookController.findBook)
 router.put("/books/:bookId",middileware.Auth, bookController.updateBook)
 router.delete("/books/:bookId",middileware.Auth, bookController.deleteBook)
-//REVIEW
 
+//REVIEW
 router.post("/books/:bookId/review",reviewController.reviewData)
 router.put("/books/:bookId/review/:reviewId",reviewController.updateReview)
 router.delete("/books/:bookId/review/:reviewId",reviewController.reviewDelete)

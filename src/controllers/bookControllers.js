@@ -16,6 +16,7 @@ const isValidRequestBody = function (requestBody) {
 }
 const isValidObjectId = function (ObjectId) {
     return mongoose.Types.ObjectId.isValid(ObjectId)
+    
 }
 
 //POST /books
@@ -104,10 +105,10 @@ const getBook = async function (req, res) {
             }
         }
         if (req.query.category) {
-            updatedfilter["category"] = req.query.category
+            updatedfilter["category"] = (req.query.category).toLowerCase().trim()
         }
         if (req.query.subCategory) {
-            updatedfilter["subCategory"] = req.query.subCategory
+            updatedfilter["subCategory"] = (req.query.subCategory).toLowerCase().trim()
         }
         let check = await bookModel.find(updatedfilter).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1 })
         if (check.length > 0) {
@@ -164,6 +165,15 @@ const findBook = async function (req, res) {
 const updateBook = async function (req, res) {
     try {
         const bookId = req.params.bookId
+        // let checkbookId = await bookModel.findOne({ _id: bookId })
+        // if (!checkbookId) {
+        //     res.status(400).send({ status: false, message: `bookid is Invalid` });
+        //     return;
+        // }
+        if (!isValidObjectId(bookId)) {
+            res.status(400).send({ status: false, message: `bookid is Invalid` });
+            return;
+        }
         let title = req.body.title
         let excerpt = req.body.excerpt
         let ISBN = req.body.ISBN
@@ -171,10 +181,7 @@ const updateBook = async function (req, res) {
         if (!isValid(bookId)) {
             return res.status(400).send({ messege: "Please Provide The Book Id" })
         }
-        if (!isValidObjectId(bookId)) {
-            res.status(400).send({ status: false, message: `bookid is Invalid` });
-            return;
-        }
+
         if (!isValidRequestBody(req.body)) {
             return res.status(400).send({ messege: "Please Provide The Required Field" })
         }
@@ -189,13 +196,13 @@ const updateBook = async function (req, res) {
             }
             title = title.trim();
         }
-        if(title === ""){return res.status(400).send({status:false,messege:"Provide The Title"})}
+        if (title === "") { return res.status(400).send({ status: false, messege: "Provide The Title" }) }
         if (excerpt) {
             if (!isValid(excerpt)) {
                 return res.status(400).send({ messege: "Please Provide The Valid Excerpt" })
             }
         }
-        if(excerpt === ""){return res.status(400).send({status:false,messege:"Provide The Excerpt"})}
+        if (excerpt === "") { return res.status(400).send({ status: false, messege: "Provide The Excerpt" }) }
         if (ISBN) {
 
             if (!isValid(ISBN)) {
@@ -208,13 +215,13 @@ const updateBook = async function (req, res) {
             ISBN = ISBN.split(" ").join("");
 
         }
-        if(ISBN === ""){return res.status(400).send({status:false,messege:"Provide The ISBN"})}
+        if (ISBN === "") { return res.status(400).send({ status: false, messege: "Provide The ISBN" }) }
         if (releasedate) {
             if (!isValid(releasedate)) {
                 return res.status(400).send({ messege: "Please Provide The Valid Date" })
             }
         }
-        if(releasedate === ""){return res.status(400).send({status:false,messege:"Provide The Release Date"})}
+        if (releasedate === "") { return res.status(400).send({ status: false, messege: "Provide The Release Date" }) }
 
         const check = await bookModel.findOne({ _id: bookId })
         const id = check.userId
