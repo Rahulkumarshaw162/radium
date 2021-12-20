@@ -111,6 +111,11 @@ const getBook = async function (req, res) {
         }
         let check = await bookModel.find(updatedfilter).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, releasedAt: 1, reviews: 1 })
         if (check.length > 0) {
+            check.sort(function (a, b) {
+                if (a.title.toLowerCase() < b.title.toLowerCase()) return -1;
+                if (a.title.toLowerCase() > b.title.toLowerCase()) return 1;
+                return 0;
+            })
             return res.status(200).send({ status: true, messege: "Book List", data: check })
         }
         else {
@@ -184,11 +189,13 @@ const updateBook = async function (req, res) {
             }
             title = title.trim();
         }
+        if(title === ""){return res.status(400).send({status:false,messege:"Provide The Title"})}
         if (excerpt) {
             if (!isValid(excerpt)) {
                 return res.status(400).send({ messege: "Please Provide The Valid Excerpt" })
             }
         }
+        if(excerpt === ""){return res.status(400).send({status:false,messege:"Provide The Excerpt"})}
         if (ISBN) {
 
             if (!isValid(ISBN)) {
@@ -201,11 +208,13 @@ const updateBook = async function (req, res) {
             ISBN = ISBN.split(" ").join("");
 
         }
+        if(ISBN === ""){return res.status(400).send({status:false,messege:"Provide The ISBN"})}
         if (releasedate) {
             if (!isValid(releasedate)) {
                 return res.status(400).send({ messege: "Please Provide The Valid Date" })
             }
         }
+        if(releasedate === ""){return res.status(400).send({status:false,messege:"Provide The Release Date"})}
 
         const check = await bookModel.findOne({ _id: bookId })
         const id = check.userId

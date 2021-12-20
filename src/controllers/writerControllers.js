@@ -68,6 +68,9 @@ const createWriter = async function (req, res) {
       res.status(404).send({ status: false, message: `${phone} is not a valid number` })
       return
     }
+    if(!(title == "Mr" || title =="Mrs" || title =="Miss")){
+      return res.status(400).send({status:false,message:"Title can Only Contain Mr,Mrs,Miss"})
+    }
 
 
     let savedWriter = await writerModel.create(writer);
