@@ -165,11 +165,6 @@ const findBook = async function (req, res) {
 const updateBook = async function (req, res) {
     try {
         const bookId = req.params.bookId
-        // let checkbookId = await bookModel.findOne({ _id: bookId })
-        // if (!checkbookId) {
-        //     res.status(400).send({ status: false, message: `bookid is Invalid` });
-        //     return;
-        // }
         if (!isValidObjectId(bookId)) {
             res.status(400).send({ status: false, message: `bookid is Invalid` });
             return;
@@ -224,7 +219,10 @@ const updateBook = async function (req, res) {
         if (releasedate === "") { return res.status(400).send({ status: false, messege: "Provide The Release Date" }) }
 
         const check = await bookModel.findOne({ _id: bookId })
-        const id = check.userId
+        if(!check){
+            return res.status(404).send({status:false, msg: "Currently Their Is No Book" })
+        }
+        let  id = check.userId
 
         if (req.user.userId == id) {
             const updatedBook = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { title: title, excerpt: excerpt, ISBN: ISBN, releasedAt: releasedate }, { new: true })
