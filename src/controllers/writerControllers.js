@@ -68,8 +68,8 @@ const createWriter = async function (req, res) {
       res.status(404).send({ status: false, message: `${phone} is not a valid number` })
       return
     }
-    if(!(title == "Mr" || title =="Mrs" || title =="Miss")){
-      return res.status(400).send({status:false,message:"Title can Only Contain Mr,Mrs,Miss"})
+    if (!(title == "Mr" || title == "Mrs" || title == "Miss")) {
+      return res.status(400).send({ status: false, message: "Title can Only Contain Mr,Mrs,Miss" })
     }
 
 
@@ -104,7 +104,7 @@ const login = async function (req, res) {
       res.status(404).send({ status: false, message: `Email should be a valid email address` })
       return
     }
-    if  (!((password.split(" ").join("")).length >= 8 && (password.split(" ").join("")).length <= 15)) {
+    if (!((password.split(" ").join("")).length >= 8 && (password.split(" ").join("")).length <= 15)) {
       res.status(404).send({ status: false, message: `Password length should be in between 8 to 15 ` });
       return;
     }
@@ -112,7 +112,7 @@ const login = async function (req, res) {
     if (email && password) {
       let User = await writerModel.findOne({ email: email.trim().toLowerCase(), password: password.split(" ").join("") });
       if (User) {
-        const Token = jwt.sign({ userId: User._id }, "login",{expiresIn: "24h"})
+        const Token = jwt.sign({ userId: User._id }, "login", { expiresIn: "24h" })
         res.header('x-api-key', Token)
 
         res.status(200).send({ status: true, messege: "You Have Successfully Logged In" })
