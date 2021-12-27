@@ -1,23 +1,44 @@
-const mongoose = require("mongoose")
-const ObjectId = mongoose.Schema.Types.ObjectId;
 
-
-
-
-/*
-
-
-title: {string, mandatory, unique},
-  description: {string, mandatory},
-  price: {number, mandatory, valid number/decimal},
-  currencyId: {string, mandatory, INR},
-  currencyFormat: {string, mandatory, Rupee symbol},
-  isFreeShipping: {boolean, default: false},
-  productImage: {string, mandatory},  // s3 link
-  style: {string},
-  availableSizes: {array of string, at least one size, enum["S", "XS","M","X", "L","XXL", "XL"]},
-  installments: {number},
-  deletedAt: {Date, when the document is deleted}, 
-  isDeleted: {boolean, default: false},
-
-*/
+const mongoose = require('mongoose')
+const productSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  price: {
+    type: Number,
+    required: true
+  },
+  currencyId: {
+    type: String,
+    required: true //INR
+  },
+  currencyFormat: {
+    type: String,
+    required: true, //Rupee symbol
+  },
+  isFreeShipping: {
+    type: Boolean,
+    default: false
+  },
+  productImage: {
+    type: String,
+    // required: true
+  }, // s3 link
+  style: { type: String },
+  availableSizes: {
+    type: [String],
+    required: true,
+    trim: true,
+    enum: ["S", "XS", "M", "X", "L", "XXL", "XL"]
+  },
+  installments: { type: Number },
+  deletedAt: { type: Date , default:null}, //when document delete
+  isDeleted: { type: Boolean, default: false }
+}, { timestamp: true })
+module.exports = mongoose.model('Product_details', productSchema)

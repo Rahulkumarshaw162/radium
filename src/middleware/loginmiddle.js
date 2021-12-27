@@ -1,27 +1,29 @@
 const jwt = require('jsonwebtoken')
 
-const userAuth = async(req, res, next) => {
+//-----------------------------------------------------------------------------//
+
+const checkLogin = async function (req, res, next) {
     try {
-        const token = req.Authorization('Bearer Token')
+        let token = req.header('Authorization', 'Bearer Token')//-----//request handling of invalid token
+        // console.log (token)
         if (!token) {
-            res.status(403).send({ status: false, message: `Missing authentication token in request` })
-            return;
+            return res.status(400).send({ status: false, message: 'You are not logged in, Please login to proceed your request' })
         }
-
-        const decoded = await jwt.verify(token, 'soramoki')
-
-        if (!decoded) {
-            res.status(403).send({ status: false, message: `Invalid authentication token in request` })
-            return;
+        let splitToken = token.split(' ')
+        // console.log (splitToken)
+        let decodedToken = jwt.verify(splitToken[1], 'group5')
+        // console.log (decodedToken.userId)
+        if (decodedToken) {
+            req.userId = decodedToken.userId
+            next();
+        } else {
+            return res.status(400).send({ status: false, message: 'Oops...token is not valid' })
         }
-
-        req.userId = decoded.userId;
-
-        next()
     } catch (error) {
-        console.error(`Error! ${error.message}`)
-        res.status(500).send({ status: false, message: error.message })
+        return res.status(500).send({ status: false, msg: error.message })
     }
 }
 
-module.exports = userAuth
+//-----------------------------------------------------------------------------//
+module.exports.checkLogin = checkLogin;
+//-----------------------------------------------------------------------------//
