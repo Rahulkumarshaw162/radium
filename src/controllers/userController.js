@@ -9,7 +9,8 @@ const createUser = async function (req, res) {
     try {
         let requestBody = req.body
         let { fname, lname, email, phone, password } = requestBody
-
+        console.log(phone)
+        console.log(fname)
         // validation start
         if (!validator.isValidRequestBody(requestBody)) {
             return res.status(400).send({ status: false, message: "please provide valid request body" })
@@ -25,9 +26,13 @@ const createUser = async function (req, res) {
         if (isEmail) {
             return res.status(400).send({ status: false, message: `Email Already Present` });
         }
+        
         if (phone) {
-            if (!/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/.test(phone)) {
-                return res.status(400).send({ status: false, message: ` something went wrong. Please enter a valid Indian phone number.` });
+            // if (!/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/.test(phone)) {
+            //     return res.status(400).send({ status: false, message: ` something went wrong. Please enter a valid Indian phone number.` });
+            // }
+            if (!validator.validatePhone(phone) ) {
+                return res.status(400).send({ status: false, message: `phone not present or  Please enter a valid phone number` })
             }
             let isPhone = await userModel.findOne({ phone: phone })
             if (isPhone) {
@@ -96,12 +101,15 @@ const getUser = async function (req, res) {
         const userId = req.params.userId
         const userIdToken = req.userId
 
+        if (!userId) {
+            return res.status(400).send({ status: false, message: "no userId in params." })
+        }
         if (!validator.isValidObjectId(userId)) {
             return res.status(400).send({ status: false, message: "Invalid userId in params." })
         }
-        // if (!validator.isValid(userId)){
-        //     return res.status(400).send({ status: false, message: " pls provide userId in params." })
-        // }
+        if (!validator.isValid(userId)) {
+            return res.status(400).send({ status: false, message: " pls provide userId in params." })
+        }
         const isUser = await userModel.findOne({ _id: userId })
         if (!isUser) {
             return res.status(400).send({ status: false, message: `${userId} doesn't exists ` })

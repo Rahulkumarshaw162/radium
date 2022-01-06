@@ -15,6 +15,10 @@ const validateEmail = function(email) {
     const re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
     return re.test(email)
 };
+const validatePhone = function(phone) {
+    const re = /^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/;
+    return re.test(phone)
+};
 const isValidNumber = function(phone) {
     const reNumber = /^[0-9]{10}$/
     return reNumber.test(phone)
@@ -36,5 +40,6 @@ module.exports = {
     isValidObjectId,
     isValidNumber,
     isValidLength,
-    validString
+    validString,
+    validatePhone
 }
