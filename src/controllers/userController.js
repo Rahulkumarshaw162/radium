@@ -8,9 +8,8 @@ const saltRounds = 10
 const createUser = async function (req, res) {
     try {
         let requestBody = req.body
-        let { fname, lname, email, phone, password } = requestBody
-        console.log(phone)
-        console.log(fname)
+        let { fname, lname, email, phone,creditScore, password } = requestBody
+        
         // validation start
         if (!validator.isValidRequestBody(requestBody)) {
             return res.status(400).send({ status: false, message: "please provide valid request body" })
@@ -39,19 +38,32 @@ const createUser = async function (req, res) {
                 return res.status(400).send({ status: false, message: ` ${phone} allready registered.` });
             }
         }
+        if (!validator.isValid(creditScore)) {
+            return res.status(400).send({ status: false, message: "creditScore is missing" })
+        }
+        if ((creditScore!=500)) {
+            return res.status(400).send({ status: false, message: "creditScore is must 500 for new user" })
+        }
         if (!validator.isValidLength(password, 8, 15) || !validator.isValid(password)) {
             return res.status(400).send({ status: false, message: `password not pressent or provided Password not  between 8 to 15 char long` })
         }
         // validation end
+        // creditScore = parseInt(creditScore)
+        creditScore = +creditScore
+        // console.log(creditScore)
+        // console.log( typeof creditScore)
         const encryptPass = await bcrypt.hash(password, 10)
         userData = {
             fname,
             lname,
             email,
             phone,
+            creditScore,
             password: encryptPass
         }
         const user = await userModel.create(userData);
+        const updatUserCredit = await userModel.findOneAndUpdate({ _id: user._id },creditScore,{new:true})
+        // let updatUserCredit = await userModel.findOneAndUpdate({ _id: askedBy }, {creditScore:(creditScore-100)})
         return res.status(201).send({ status: true, message: "user created successfully.", data: user });
     } catch (err) {
         return res.status(500).send({ status: false, message: "Error is : " + err })
@@ -192,7 +204,9 @@ const updateUser = async function (req, res) {
                 password: password
             }
         }, { new: true })
+        console.log(updatedUser)
         return res.status(200).send({ status: true, data: updatedUser })
+        console.log(data)
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })
     }

@@ -34,12 +34,33 @@ const replyAnswer = async function (req, res) {
         if (!validator.isValidObjectId(questionId)) {
             return res.status(400).send({ status: false, message: "questionId  is not valid" });
         }
+        const isUser = await userModel.find({ _Id: answeredBy })
+
+        if (!isUser[0]) {
+            res.status(400).send({ status: false, message: "no user" })
+        }
+        const isQuestion = await questionModel.find({ _id: questionId, isDeleted: false })
+        if (!isQuestion[0]) {
+            return res.status(400).send({ status: false, message: `${questionId} doesn't exists ` })
+        }
+        console.log(isQuestion)
+        if (isQuestion[0].askedBy == answeredBy) {
+            return res.status(400).send({ status: false, message: `${answeredBy}  is same ${isQuestion[0].askedBy} Id so you can't ans your ans ` })
+        }
+
+        if (!(answeredBy.toString() == tokenId.toString())) {
+            return res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
+        }
+        let creditScore = isUser[0].creditScore + 200
+
         userAnswer = {
             answeredBy,
             text,
             questionId
         }
         const answer = await answerModel.create(userAnswer);
+        const updatUserCredit = await userModel.findOneAndUpdate({ _id: answeredBy }, { $set: { creditScore: creditScore } }, { new: true })
+        // console.log(updatUserCredit)
         return res.status(201).send({ status: true, message: "User reply answer succesfully.", data: answer });
     } catch (err) {
         return res.status(500).send({ status: false, message: "Error is : " + err })
@@ -53,7 +74,7 @@ const getAnswerByQuestionId = async function (req, res) {
         if (!validator.isValidObjectId(questionId)) {
             return res.status(400).send({ status: false, message: "Invalid questionId in params." })
         }
-        const isQuestion = await questionModel.findOne({ _id: questionId, isDeleted: false })
+        const isQuestion = await questionModel.findOne({ _id: questionId, isDeleted: false }).sort({createdAt:-1})
         if (!isQuestion) {
             return res.status(400).send({ status: false, message: `${questionId} doesn't exists ` })
         }
@@ -62,8 +83,8 @@ const getAnswerByQuestionId = async function (req, res) {
         // if (!isAnswer[0]) {
         //     return res.status(400).send({ status: false, message: `For this ${questionId} no answer exists ` })
         // }
-        
-        isAnswerForQue = await answerModel.find({ questionId: questionId,isDeleted: false }).populate("questionId")
+
+        isAnswerForQue = await answerModel.find({ questionId: questionId, isDeleted: false }).populate("questionId").sort({createdAt:-1})
         if (!isAnswerForQue[0]) {
             return res.status(200).send({ status: true, message: "question find succesfully  but there is no any answer.", data: isQuestion })
         }

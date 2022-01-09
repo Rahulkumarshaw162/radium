@@ -14,7 +14,7 @@ app.use('/', route);
 
 const mongoose = require('mongoose')
 
-mongoose.connect("mongodb+srv://users-open-to-all:hiPassword123@cluster0.uh35t.mongodb.net/RahulShawDB?retryWrites=true&w=majority", {useNewUrlParser: true})
+mongoose.connect("mongodb+srv://users-open-to-all:hiPassword123@cluster0.uh35t.mongodb.net/RahulShawQuraDB?retryWrites=true&w=majority", {useNewUrlParser: true})
     .then(() => console.log('mongodb running and connected'))
     .catch(err => console.log(err))
 

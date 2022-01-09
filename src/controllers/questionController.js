@@ -29,18 +29,35 @@ const askQuestion = async function (req, res) {
         if (!validator.isValidObjectId(askedBy)) {
             return res.status(400).send({ status: false, message: "userId or token is not valid" });;
         }
+        const isUser = await userModel.find({ _Id: askedBy })
+
+        if (!isUser[0]) {
+            res.status(400).send({ status: false, message: "no user" })
+        }
+        let creditScore = isUser[0].creditScore - 100
+        if (creditScore < 0) {
+            return res.status(400).send({ status: false, msg: "you can not send more than 5 ques" })
+        }
+        // console.log(isUser)
+        // console.log(creditScore)
+        // console.log(typeof creditScore)
+        if (!(askedBy.toString() == tokenId.toString())) {
+            return res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
+        }
         userQuestion = {
             description,
             tag,
             askedBy
         }
         const question = await questionModel.create(userQuestion);
-        return res.status(201).send({ status: true, message: "Question asked succesfully.", data: question });
+        const updatUserCredit = await userModel.findOneAndUpdate({ _id: askedBy }, { $set: { creditScore: creditScore } }, { new: true })
+        console.log(updatUserCredit)
+        return res.status(201).send({ status: true, message: "Question asked succesfully.", data: { question, updatUserCredit } });
     } catch (err) {
         return res.status(500).send({ status: false, message: "Error is : " + err })
     }
 }
-//////////////////////////
+//////////////////////////   GET /questions (public api)   //////////
 const filterQuestion = async function (req, res) {
     try {
         let queryParam = req.query
@@ -53,23 +70,30 @@ const filterQuestion = async function (req, res) {
             query['tag'] = { $regex: tag.trim() }
         }
         let descending = "descending"
-        // console.log(descending)
-        // console.log(sort)
         if (sort) {
             if (!(sort == descending)) {
                 return res.status(400).send({ status: false, message: ' Please provide Sort value descending' })
             }
-
-
-            let questionsOfQuery = await questionModel.find(query).sort({ createdAt: -1 })
-            // console.log(sort)
-            // console.log(sort.createdAt)
-            if (Array.isArray(questionsOfQuery) && questionsOfQuery.length === 0) {
-                return res.status(404).send({ status: false, message: 'No products found' })
-            }
         }
-        let questionsOfQuery = await questionModel.find(query)
-        return res.status(200).send({ status: true, message: 'Question list', data: questionsOfQuery })
+        let questionsOfQuery = await questionModel.find(query).sort({createdAt:-1})
+        if (Array.isArray(questionsOfQuery) && questionsOfQuery.length === 0) {
+            return res.status(404).send({ status: false, message: 'No Questions are exist for this query' })
+        }
+        var isAnswerForQue = [];
+        for (let i=0; i<questionsOfQuery.length; i++){
+            let questionId = questionsOfQuery[i]._id
+            let isAnswerForQue1 = await answerModel.find({ questionId: questionId }).populate("questionId")
+            // isAnswerForQue['isAnswerForQue1'] = isAnswerForQue1
+            if (isAnswerForQue1[0]){
+                isAnswerForQue.push(isAnswerForQue1)
+            }
+            // console.log(isAnswerForQue1)
+            // console.log(isAnswerForQue)
+        }
+        if (!isAnswerForQue[0]) {
+            return res.status(200).send({ status: true, message: "question find succesfully  but there is no any answer.", data: questionsOfQuery })
+        }
+        return res.status(200).send({ status: true, message: 'Question list with answer', data: isAnswerForQue })
     } catch (error) {
         res.status(500).send({ status: false, message: error.message })
     }
@@ -82,11 +106,12 @@ const getquestionById = async function (req, res) {
         if (!validator.isValidObjectId(questionId)) {
             return res.status(400).send({ status: false, message: "Invalid questionId in params." })
         }
-        const isQuestion = await questionModel.findOne({ _id: questionId, isDeleted: false })
+        const isQuestion = await questionModel.findOne({ _id: questionId, isDeleted: false }).sort({createdAt:-1})
         if (!isQuestion) {
             return res.status(400).send({ status: false, message: `${questionId} doesn't exists ` })
         }
-        isAnswerForQue = await answerModel.find({ questionId: questionId }).populate("questionId")
+        console.log(questionId)
+        isAnswerForQue = await answerModel.find({ questionId: questionId }).populate("questionId").sort({createdAt:-1})
         if (!isAnswerForQue[0]) {
             return res.status(200).send({ status: true, message: "question find succesfully  but there is no any answer.", data: isQuestion })
         }
