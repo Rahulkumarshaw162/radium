@@ -164,13 +164,19 @@ const updateUser = async function (req, res) {
             return
         }
         // Extract params
-        let { fname, lname, email, phone, password } = requestBody;
+        let { fname, lname, email, phone} = requestBody;
 
         if (!validator.validString(fname) || !validator.validString(lname)) {
             return res.status(400).send({ status: false, message: 'first name or last name is Required' })
         }
+        if (!validator.validString(email) ) {
+            return res.status(400).send({ status: false, message: 'email address should be  required' })
+        }
         if (email) {
-            if (!validator.validString(email) || !validator.validateEmail(email)) {
+            // if (!validator.validString(email) ) {
+            //     return res.status(400).send({ status: false, message: 'Please provide a valid email string address' })
+            // }
+            if ( !validator.validateEmail(email)) {
                 return res.status(400).send({ status: false, message: 'Please provide a valid email address' })
             }
             let isEmail = await userModel.findOne({ email: email })
@@ -178,9 +184,9 @@ const updateUser = async function (req, res) {
                 return res.status(400).send({ status: false, message: ` email already registered, try onother` });
             }
         }
-        if (!validator.validString(phone)) {
-            return res.status(400).send({ status: false, message: 'phone number is Required' })
-        }
+        // if (!validator.validString(phone)) {
+        //     return res.status(400).send({ status: false, message: 'phone number is Required' })
+        // }
 
         if (phone) {
             if (!/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/.test(phone)) {
@@ -191,17 +197,21 @@ const updateUser = async function (req, res) {
                 return res.status(400).send({ status: false, message: ` ${phone} already registered.` });
             }
         }
-        if (password) {
-            console.log(password)
-            return res.status(400).send({ status: false, message: ` you can't update password ` });
-        }
+        // if (password) {
+        //     console.log(password)
+        //     return res.status(400).send({ status: false, message: ` you can't update password ` });
+        // }
+        // if (creditScore) {
+        //     return res.status(400).send({ status: false, message: ` you can't update creditScore ` });
+        // }
         let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, {
             $set: {
                 fname: fname,
                 lname: lname,
                 email: email,
                 phone: phone,
-                password: password
+                // creditScore,
+                // password: password
             }
         }, { new: true })
         console.log(updatedUser)

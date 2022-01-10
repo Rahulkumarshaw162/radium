@@ -184,7 +184,7 @@ const deleteAnswer = async function (req, res) {
             return res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
         }
 
-        const deletedAnswer = await answerModel.findOneAndUpdate({ _id: answerId, isDeleted: false }, { isDeleted: true }, { new: true })
+        const deletedAnswer = await answerModel.findOneAndUpdate({ _id: answerId, isDeleted: false }, { isDeleted: true ,deletedAt:Date.now()}, { new: true })
 
         return res.status(200).send({ status: true, message: 'Successfully answer deleted.', data: deletedAnswer });
     } catch (err) {

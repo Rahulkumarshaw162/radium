@@ -144,8 +144,11 @@ const updateQuestion = async function (req, res) {
             return res.status(400).send({ status: false, message: 'No paramateres passed in req body' })
         }
         let { description, tag } = requestBody;
-
+        if (!validator.validString(description) ) {
+            return res.status(400).send({ status: false, message: 'description should be  required' })
+        }
         const newQuestion = {}
+        
         if (description || tag) {
             if (validator.isValid(description)) {
                 if (!(('description') in newQuestion))
